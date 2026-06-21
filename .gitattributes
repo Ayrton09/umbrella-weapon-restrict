@@ -1,0 +1,5 @@
+# Normalize line endings to LF for text files (servers run on Linux)
+* text=auto eol=lf
+
+# Compiled plugin is binary
+*.smx binary

@@ -1,0 +1,450 @@
+"Phrases"
+{
+	"Weapon Restriction Menu Title"
+	{
+		"en"		"Weapon Restriction"
+		"es"		"Restricción de armas"
+		"pt"		"Restrição de armas"
+		"chi"		"武器限制"
+		"ru"		"Ограничение оружия"
+		"fr"		"Restriction des armes"
+		"de"		"Waffenbeschränkung"
+		"tr"		"Silah Kısıtlama"
+		"pl"		"Ograniczenie broni"
+	}
+
+	"Configure Restrictions"
+	{
+		"en"		"Configure restrictions"
+		"es"		"Configurar restricciones"
+		"pt"		"Configurar restrições"
+		"chi"		"配置限制"
+		"ru"		"Настроить ограничения"
+		"fr"		"Configurer les restrictions"
+		"de"		"Einschränkungen konfigurieren"
+		"tr"		"Kısıtlamaları yapılandır"
+		"pl"		"Konfiguruj ograniczenia"
+	}
+
+	"Command In Game Only"
+	{
+		"en"		"This command can only be used in-game."
+		"es"		"Este comando solo se puede usar dentro del juego."
+		"pt"		"Este comando só pode ser usado dentro do jogo."
+		"chi"		"此命令只能在游戏中使用。"
+		"ru"		"Эту команду можно использовать только в игре."
+		"fr"		"Cette commande ne peut être utilisée qu'en jeu."
+		"de"		"Dieser Befehl kann nur im Spiel verwendet werden."
+		"tr"		"Bu komut yalnızca oyun içinde kullanılabilir."
+		"pl"		"Tej komendy można użyć tylko w grze."
+	}
+
+	"Restrictions Applied"
+	{
+		"en"		"Restrictions applied to current weapons."
+		"es"		"Restricciones aplicadas a las armas actuales."
+		"pt"		"Restrições aplicadas às armas atuais."
+		"chi"		"已将限制应用到当前武器。"
+		"ru"		"Ограничения применены к текущему оружию."
+		"fr"		"Les restrictions ont été appliquées aux armes actuelles."
+		"de"		"Einschränkungen auf aktuelle Waffen angewendet."
+		"tr"		"Kısıtlamalar mevcut silahlara uygulandı."
+		"pl"		"Ograniczenia zastosowane do obecnej broni."
+	}
+
+	"Restrict Usage"
+	{
+		"en"		"Usage: sm_restrict <weapon|group|all> [amount] [t|ct|both]"
+		"es"		"Uso: sm_restrict <arma|grupo|all> [cantidad] [t|ct|both]"
+		"pt"		"Uso: sm_restrict <arma|grupo|all> [quantidade] [t|ct|both]"
+		"chi"		"用法：sm_restrict <weapon|group|all> [amount] [t|ct|both]"
+		"ru"		"Использование: sm_restrict <weapon|group|all> [amount] [t|ct|both]"
+		"fr"		"Utilisation : sm_restrict <arme|groupe|all> [quantité] [t|ct|both]"
+		"de"		"Verwendung: sm_restrict <waffe|gruppe|all> [anzahl] [t|ct|both]"
+		"tr"		"Kullanım: sm_restrict <silah|grup|all> [miktar] [t|ct|both]"
+		"pl"		"Użycie: sm_restrict <broń|grupa|all> [ilość] [t|ct|both]"
+	}
+
+	"Unrestrict Usage"
+	{
+		"en"		"Usage: sm_unrestrict <weapon|group|all> [t|ct|both]"
+		"es"		"Uso: sm_unrestrict <arma|grupo|all> [t|ct|both]"
+		"pt"		"Uso: sm_unrestrict <arma|grupo|all> [t|ct|both]"
+		"chi"		"用法：sm_unrestrict <weapon|group|all> [t|ct|both]"
+		"ru"		"Использование: sm_unrestrict <weapon|group|all> [t|ct|both]"
+		"fr"		"Utilisation : sm_unrestrict <arme|groupe|all> [t|ct|both]"
+		"de"		"Verwendung: sm_unrestrict <waffe|gruppe|all> [t|ct|both]"
+		"tr"		"Kullanım: sm_unrestrict <silah|grup|all> [t|ct|both]"
+		"pl"		"Użycie: sm_unrestrict <broń|grupa|all> [t|ct|both]"
+	}
+
+	"Invalid Amount"
+	{
+		"en"		"Invalid amount. Use -1, 0, or a positive number."
+		"es"		"Cantidad inválida. Usa -1, 0 o un número positivo."
+		"pt"		"Quantidade inválida. Use -1, 0 ou um número positivo."
+		"chi"		"数量无效。请使用 -1、0 或正数。"
+		"ru"		"Неверное количество. Используйте -1, 0 или положительное число."
+		"fr"		"Quantité invalide. Utilisez -1, 0 ou un nombre positif."
+		"de"		"Ungültige Anzahl. Verwende -1, 0 oder eine positive Zahl."
+		"tr"		"Geçersiz miktar. -1, 0 veya pozitif bir sayı kullanın."
+		"pl"		"Nieprawidłowa ilość. Użyj -1, 0 lub liczby dodatniej."
+	}
+
+	"Invalid Team"
+	{
+		"en"		"Invalid team. Use t, ct, or both."
+		"es"		"Equipo inválido. Usa t, ct o both."
+		"pt"		"Equipe inválida. Use t, ct ou both."
+		"chi"		"队伍无效。请使用 t、ct 或 both。"
+		"ru"		"Неверная команда. Используйте t, ct или both."
+		"fr"		"Équipe invalide. Utilisez t, ct ou both."
+		"de"		"Ungültiges Team. Verwende t, ct oder both."
+		"tr"		"Geçersiz takım. t, ct veya both kullanın."
+		"pl"		"Nieprawidłowa drużyna. Użyj t, ct lub both."
+	}
+
+	"All Weapons Restricted"
+	{
+		"#format"	"{1:s},{2:d}"
+		"en"		"Restriction applied to all weapons: {1} = {2}."
+		"es"		"Restricción aplicada a todas las armas: {1} = {2}."
+		"pt"		"Restrição aplicada a todas as armas: {1} = {2}."
+		"chi"		"已对所有武器应用限制：{1} = {2}。"
+		"ru"		"Ограничение применено ко всему оружию: {1} = {2}."
+		"fr"		"Restriction appliquée à toutes les armes : {1} = {2}."
+		"de"		"Einschränkung auf alle Waffen angewendet: {1} = {2}."
+		"tr"		"Tüm silahlara kısıtlama uygulandı: {1} = {2}."
+		"pl"		"Ograniczenie zastosowane do całej broni: {1} = {2}."
+	}
+
+	"Invalid Weapon"
+	{
+		"#format"	"{1:s}"
+		"en"		"Invalid or unmanaged weapon/group: {1}."
+		"es"		"Arma o grupo inválido/no administrado: {1}."
+		"pt"		"Arma ou grupo inválido/não gerenciado: {1}."
+		"chi"		"无效或未管理的武器/组：{1}。"
+		"ru"		"Неверное или неуправляемое оружие/группа: {1}."
+		"fr"		"Arme ou groupe invalide/non géré : {1}."
+		"de"		"Ungültige oder nicht verwaltete Waffe/Gruppe: {1}."
+		"tr"		"Geçersiz veya yönetilmeyen silah/grup: {1}."
+		"pl"		"Nieprawidłowa lub niezarządzana broń/grupa: {1}."
+	}
+
+	"Weapon Restricted"
+	{
+		"#format"	"{1:s},{2:s},{3:d}"
+		"en"		"{1} for {2} = {3}."
+		"es"		"{1} para {2} = {3}."
+		"pt"		"{1} para {2} = {3}."
+		"chi"		"{1} 对 {2} = {3}。"
+		"ru"		"{1} для {2} = {3}."
+		"fr"		"{1} pour {2} = {3}."
+		"de"		"{1} für {2} = {3}."
+		"tr"		"{2} için {1} = {3}."
+		"pl"		"{1} dla {2} = {3}."
+	}
+
+	"Weapon Group Restricted"
+	{
+		"#format"	"{1:s},{2:s},{3:d}"
+		"en"		"{1} group for {2} = {3}."
+		"es"		"Grupo {1} para {2} = {3}."
+		"pt"		"Grupo {1} para {2} = {3}."
+		"chi"		"{1} 组对 {2} = {3}。"
+		"ru"		"Группа {1} для {2} = {3}."
+		"fr"		"Groupe {1} pour {2} = {3}."
+		"de"		"Gruppe {1} für {2} = {3}."
+		"tr"		"{2} için {1} grubu = {3}."
+		"pl"		"Grupa {1} dla {2} = {3}."
+	}
+
+	"Weapon Groups Option"
+	{
+		"en"		"Weapon groups"
+		"es"		"Grupos de armas"
+		"pt"		"Grupos de armas"
+		"chi"		"武器组"
+		"ru"		"Группы оружия"
+		"fr"		"Groupes d'armes"
+		"de"		"Waffengruppen"
+		"tr"		"Silah grupları"
+		"pl"		"Grupy broni"
+	}
+
+	"Weapon Group Menu Title"
+	{
+		"en"		"Weapon Groups"
+		"es"		"Grupos de armas"
+		"pt"		"Grupos de armas"
+		"chi"		"武器组"
+		"ru"		"Группы оружия"
+		"fr"		"Groupes d'armes"
+		"de"		"Waffengruppen"
+		"tr"		"Silah Grupları"
+		"pl"		"Grupy broni"
+	}
+
+	"Group Pistols"
+	{
+		"en"		"Pistols"
+		"es"		"Pistolas"
+		"pt"		"Pistolas"
+		"chi"		"手枪"
+		"ru"		"Пистолеты"
+		"fr"		"Pistolets"
+		"de"		"Pistolen"
+		"tr"		"Tabancalar"
+		"pl"		"Pistolety"
+	}
+
+	"Group SMGs"
+	{
+		"en"		"SMGs"
+		"es"		"Subfusiles"
+		"pt"		"Submetralhadoras"
+		"chi"		"冲锋枪"
+		"ru"		"Пистолеты-пулемёты"
+		"fr"		"Pistolets-mitrailleurs"
+		"de"		"Maschinenpistolen"
+		"tr"		"Hafif Makineli Tüfekler"
+		"pl"		"Pistolety maszynowe"
+	}
+
+	"Group Shotguns"
+	{
+		"en"		"Shotguns"
+		"es"		"Escopetas"
+		"pt"		"Escopetas"
+		"chi"		"霰弹枪"
+		"ru"		"Дробовики"
+		"fr"		"Fusils à pompe"
+		"de"		"Schrotflinten"
+		"tr"		"Pompalılar"
+		"pl"		"Strzelby"
+	}
+
+	"Group Rifles"
+	{
+		"en"		"Rifles"
+		"es"		"Rifles"
+		"pt"		"Rifles"
+		"chi"		"步枪"
+		"ru"		"Винтовки"
+		"fr"		"Fusils"
+		"de"		"Gewehre"
+		"tr"		"Tüfekler"
+		"pl"		"Karabiny"
+	}
+
+	"Group Snipers"
+	{
+		"en"		"Snipers"
+		"es"		"Francotiradores"
+		"pt"		"Snipers"
+		"chi"		"狙击枪"
+		"ru"		"Снайперские винтовки"
+		"fr"		"Snipers"
+		"de"		"Scharfschützengewehre"
+		"tr"		"Keskin Nişancılar"
+		"pl"		"Karabiny snajperskie"
+	}
+
+	"Group Grenades"
+	{
+		"en"		"Grenades"
+		"es"		"Granadas"
+		"pt"		"Granadas"
+		"chi"		"手雷"
+		"ru"		"Гранаты"
+		"fr"		"Grenades"
+		"de"		"Granaten"
+		"tr"		"El Bombaları"
+		"pl"		"Granaty"
+	}
+
+	"Group Armor"
+	{
+		"en"		"Armor"
+		"es"		"Chalecos"
+		"pt"		"Colete"
+		"chi"		"护甲"
+		"ru"		"Броня"
+		"fr"		"Armure"
+		"de"		"Panzerung"
+		"tr"		"Zırh"
+		"pl"		"Pancerz"
+	}
+
+	"Team Menu Title"
+	{
+		"en"		"Team"
+		"es"		"Equipo"
+		"pt"		"Equipe"
+		"chi"		"队伍"
+		"ru"		"Команда"
+		"fr"		"Équipe"
+		"de"		"Team"
+		"tr"		"Takım"
+		"pl"		"Drużyna"
+	}
+
+	"Team Terrorists"
+	{
+		"en"		"Terrorists"
+		"es"		"Terroristas"
+		"pt"		"Terroristas"
+		"chi"		"恐怖分子"
+		"ru"		"Террористы"
+		"fr"		"Terroristes"
+		"de"		"Terroristen"
+		"tr"		"Teröristler"
+		"pl"		"Terroryści"
+	}
+
+	"Team Counter Terrorists"
+	{
+		"en"		"Counter-Terrorists"
+		"es"		"Counter-Terrorists"
+		"pt"		"Contra-Terroristas"
+		"chi"		"反恐精英"
+		"ru"		"Спецназ"
+		"fr"		"Antiterroristes"
+		"de"		"Antiterroreinheit"
+		"tr"		"Anti-Teröristler"
+		"pl"		"Antyterroryści"
+	}
+
+	"Team Terrorists Short"
+	{
+		"en"		"T"
+		"es"		"T"
+		"pt"		"T"
+		"chi"		"T"
+		"ru"		"T"
+		"fr"		"T"
+		"de"		"T"
+		"tr"		"T"
+		"pl"		"T"
+	}
+
+	"Team Counter Terrorists Short"
+	{
+		"en"		"CT"
+		"es"		"CT"
+		"pt"		"CT"
+		"chi"		"CT"
+		"ru"		"CT"
+		"fr"		"CT"
+		"de"		"CT"
+		"tr"		"CT"
+		"pl"		"CT"
+	}
+
+	"Team Both"
+	{
+		"en"		"both teams"
+		"es"		"ambos equipos"
+		"pt"		"ambas as equipes"
+		"chi"		"双方队伍"
+		"ru"		"обе команды"
+		"fr"		"les deux équipes"
+		"de"		"beide Teams"
+		"tr"		"her iki takım"
+		"pl"		"obie drużyny"
+	}
+
+	"Limit Menu Title"
+	{
+		"en"		"Limit"
+		"es"		"Límite"
+		"pt"		"Limite"
+		"chi"		"限制"
+		"ru"		"Лимит"
+		"fr"		"Limite"
+		"de"		"Limit"
+		"tr"		"Limit"
+		"pl"		"Limit"
+	}
+
+	"Unlimited Option"
+	{
+		"en"		"Unlimited (-1)"
+		"es"		"Sin límite (-1)"
+		"pt"		"Sem limite (-1)"
+		"chi"		"无限制 (-1)"
+		"ru"		"Без лимита (-1)"
+		"fr"		"Illimité (-1)"
+		"de"		"Unbegrenzt (-1)"
+		"tr"		"Sınırsız (-1)"
+		"pl"		"Bez limitu (-1)"
+	}
+
+	"Blocked Option"
+	{
+		"en"		"Blocked (0)"
+		"es"		"Bloqueada (0)"
+		"pt"		"Bloqueada (0)"
+		"chi"		"已封锁 (0)"
+		"ru"		"Заблокировано (0)"
+		"fr"		"Bloquée (0)"
+		"de"		"Gesperrt (0)"
+		"tr"		"Engelli (0)"
+		"pl"		"Zablokowane (0)"
+	}
+
+	"Invalid Selection"
+	{
+		"en"		"Invalid selection, choose again."
+		"es"		"Selección inválida, vuelve a elegir."
+		"pt"		"Seleção inválida, escolha novamente."
+		"chi"		"选择无效，请重新选择。"
+		"ru"		"Неверный выбор, выберите снова."
+		"fr"		"Sélection invalide, choisissez à nouveau."
+		"de"		"Ungültige Auswahl, bitte erneut wählen."
+		"tr"		"Geçersiz seçim, tekrar seçin."
+		"pl"		"Nieprawidłowy wybór, wybierz ponownie."
+	}
+
+	"Weapon Blocked For Team"
+	{
+		"#format"	"{1:s}"
+		"en"		"{1} is blocked for your team."
+		"es"		"{1} está bloqueada para tu equipo."
+		"pt"		"{1} está bloqueada para sua equipe."
+		"chi"		"{1} 已被你的队伍禁用。"
+		"ru"		"{1} заблокировано для вашей команды."
+		"fr"		"{1} est bloquée pour votre équipe."
+		"de"		"{1} ist für dein Team gesperrt."
+		"tr"		"{1} takımınız için engellendi."
+		"pl"		"{1} jest zablokowana dla twojej drużyny."
+	}
+
+	"Weapon Limit Reached"
+	{
+		"#format"	"{1:s},{2:d}"
+		"en"		"{1} reached your team limit ({2})."
+		"es"		"{1} alcanzó el límite de tu equipo ({2})."
+		"pt"		"{1} atingiu o limite da sua equipe ({2})."
+		"chi"		"{1} 已达到你的队伍限制 ({2})。"
+		"ru"		"{1} достигло лимита вашей команды ({2})."
+		"fr"		"{1} a atteint la limite de votre équipe ({2})."
+		"de"		"{1} hat das Limit deines Teams erreicht ({2})."
+		"tr"		"{1} takım limitinize ulaştı ({2})."
+		"pl"		"{1} osiągnęła limit twojej drużyny ({2})."
+	}
+
+	"Unknown Weapon"
+	{
+		"en"		"Unknown weapon"
+		"es"		"Arma desconocida"
+		"pt"		"Arma desconhecida"
+		"chi"		"未知武器"
+		"ru"		"Неизвестное оружие"
+		"fr"		"Arme inconnue"
+		"de"		"Unbekannte Waffe"
+		"tr"		"Bilinmeyen silah"
+		"pl"		"Nieznana broń"
+	}
+}

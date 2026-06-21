@@ -1,0 +1,10 @@
+"PerPlayer"
+{
+	// Example only. Uncomment and edit to enable per-player limits.
+	// "awp"
+	// {
+	// 	"default"	"0"
+	// 	"10"		"1"
+	// 	"20"		"2"
+	// }
+}
