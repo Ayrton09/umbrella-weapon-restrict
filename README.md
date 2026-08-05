@@ -78,7 +78,7 @@ sm_uwr_perplayer_count_specs 1
 Version cvar:
 
 ```cfg
-sm_umbrella_weaponrestrict_version 1.0.0
+sm_umbrella_weaponrestrict_version 1.0.1
 ```
 
 Per-weapon cvars are generated automatically:

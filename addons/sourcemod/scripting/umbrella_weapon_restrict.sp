@@ -9,7 +9,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define PLUGIN_VERSION "1.0.0"
+#define PLUGIN_VERSION "1.0.1"
 #define CONFIG_NAME "umbrella_weapon_restrict"
 #define REPLY_PREFIX "[UWR]"
 #define TEAM_BOTH 0
@@ -1526,6 +1526,7 @@ bool ShouldManageWeapon(CSWeaponID id)
 			 CSWeapon_KNIFE_GG,
 			 CSWeapon_KNIFE_T,
 			 CSWeapon_KNIFE_GHOST,
+			 CSWeapon_C4,
 			 CSWeapon_NIGHTVISION,
 			 CSWeapon_DEFUSER,
 			 CSWeapon_CUTTERS,

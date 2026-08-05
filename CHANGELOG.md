@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.1] - 2026-08-05
+
+### Fixed
+- The C4 is no longer managed by the plugin. Restricting it (for example with `sm_restrict all 0`) removed the bomb from the map and blocked pickups, breaking the objective on bomb maps.
+
 ## [1.0.0] - 2026-06-21
 
 Initial release.
