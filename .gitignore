@@ -18,3 +18,33 @@ compiled/
 # SourcePawn intermediate files (the released .smx is tracked on purpose)
 *.asm
 *.lst
+
+# Secrets and credentials
+*.pem
+*.key
+*.pfx
+*.p12
+*.ppk
+id_rsa*
+id_ed25519*
+.env
+.env.*
+!.env.example
+*credentials*
+*secret*
+*.token
+
+# Local databases, logs and backups
+*.db
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+*.db-journal
+*.log
+logs/
+*.bak
+*.old
+
+# Assistant and editor folders
+.claude/
+.vs/

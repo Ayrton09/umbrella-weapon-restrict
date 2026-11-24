@@ -9,7 +9,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define PLUGIN_VERSION "1.0.1"
+#define PLUGIN_VERSION "1.0.2"
 #define CONFIG_NAME "umbrella_weapon_restrict"
 #define REPLY_PREFIX "[UWR]"
 #define TEAM_BOTH 0
@@ -17,6 +17,9 @@
 #define TEAM_INDEX_CT 1
 #define TEAM_INDEX_COUNT 2
 #define NOTIFY_DELAY 1.5
+#define PICKUP_NOTIFY_SLOTS 4
+#define MAX_TRACKED_ENTITIES 2048
+#define CSGO_MAX_WEAPON_DEFINDEX 500
 #define DEFAULT_RESTRICT_SOUND "sound/buttons/weapon_cant_buy.wav"
 #define PERPLAYER_CONFIG "configs/umbrella_weapon_restrict/perplayerrestrict.txt"
 #define PERPLAYER_INVALID -3
@@ -58,13 +61,17 @@ int g_MenuTeam[MAXPLAYERS + 1];
 int g_DefaultRestrictions[CSWeapon_MAX_WEAPONS][TEAM_INDEX_COUNT];
 int g_PerPlayerLimits[CSWeapon_MAX_WEAPONS][MAXPLAYERS + 1];
 float g_NextNotify[MAXPLAYERS + 1];
+float g_NextPickupNotify[MAXPLAYERS + 1];
 bool g_ClientHooked[MAXPLAYERS + 1];
 bool g_PerPlayerReady;
 bool g_ApplyingPerPlayer;
 bool g_PerPlayerApplied;
 bool g_PerPlayerDirty;
 bool g_RestrictSoundReady;
-int g_LastPickupNotifyRef[MAXPLAYERS + 1];
+bool g_PerPlayerFrameQueued;
+int g_PickupNotifyRefs[MAXPLAYERS + 1][PICKUP_NOTIFY_SLOTS];
+int g_PickupNotifySlot[MAXPLAYERS + 1];
+int g_WeaponCreatedTick[MAX_TRACKED_ENTITIES];
 int g_LastPerPlayerCount = -1;
 char g_ChatPrefix[32];
 char g_RestrictSound[PLATFORM_MAX_PATH];
@@ -75,7 +82,7 @@ public Plugin myinfo =
 	author = "Ayrton09",
 	description = "Weapon restriction plugin for CS:S and CS:GO",
 	version = PLUGIN_VERSION,
-	url = ""
+	url = "https://github.com/Ayrton09/umbrella-weapon-restrict"
 };
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int errMax)
@@ -96,6 +103,11 @@ public void OnPluginStart()
 {
 	g_WeaponIds = new ArrayList();
 	g_WeaponIdCache = new StringMap();
+
+	for (int entity = 0; entity < MAX_TRACKED_ENTITIES; entity++)
+	{
+		g_WeaponCreatedTick[entity] = -1;
+	}
 
 	InitChatPrefix();
 	InitPerPlayerStorage();
@@ -134,12 +146,16 @@ void InitChatPrefix()
 		return;
 	}
 
-	strcopy(g_ChatPrefix, sizeof(g_ChatPrefix), "\x02[UWR]\x04 ");
+	// CS:GO ignores a color code at the very start of a chat message, so lead with a space.
+	strcopy(g_ChatPrefix, sizeof(g_ChatPrefix), " \x02[UWR]\x04 ");
 }
 
 public void OnMapStart()
 {
 	g_MapStarted = true;
+	// A queued enforce timer is killed on map change without running, which would leave the flag set forever.
+	g_EnforceQueued = false;
+	g_PerPlayerFrameQueued = false;
 	ResetAllPickupNotify();
 	EnsureWeaponCvars();
 	CacheRestrictSound();
@@ -165,7 +181,7 @@ public void OnClientPutInServer(int client)
 	g_MenuWeapon[client] = 0;
 	g_MenuTeam[client] = TEAM_BOTH;
 	g_NextNotify[client] = 0.0;
-	g_LastPickupNotifyRef[client] = INVALID_ENT_REFERENCE;
+	ResetPickupNotify(client);
 	ApplyPerPlayerRestrictions();
 }
 
@@ -176,7 +192,15 @@ public void OnClientDisconnect(int client)
 	g_MenuWeapon[client] = 0;
 	g_MenuTeam[client] = TEAM_BOTH;
 	g_NextNotify[client] = 0.0;
-	g_LastPickupNotifyRef[client] = INVALID_ENT_REFERENCE;
+	ResetPickupNotify(client);
+}
+
+public void OnEntityCreated(int entity, const char[] classname)
+{
+	if (entity > MaxClients && entity < MAX_TRACKED_ENTITIES)
+	{
+		g_WeaponCreatedTick[entity] = (StrContains(classname, "weapon_", false) == 0) ? GetGameTickCount() : -1;
+	}
 }
 
 public void OnClientDisconnect_Post(int client)
@@ -302,8 +326,19 @@ void ResetAllPickupNotify()
 {
 	for (int client = 1; client <= MaxClients; client++)
 	{
-		g_LastPickupNotifyRef[client] = INVALID_ENT_REFERENCE;
+		ResetPickupNotify(client);
 	}
+}
+
+void ResetPickupNotify(int client)
+{
+	for (int slot = 0; slot < PICKUP_NOTIFY_SLOTS; slot++)
+	{
+		g_PickupNotifyRefs[client][slot] = INVALID_ENT_REFERENCE;
+	}
+
+	g_PickupNotifySlot[client] = 0;
+	g_NextPickupNotify[client] = 0.0;
 }
 
 void HookClient(int client)
@@ -331,15 +366,15 @@ void ExecConfigIfExists()
 
 void CreateCoreConVars()
 {
-	g_CvarEnabled = CreateConVar("sm_uwr_enabled", "1", "", _, true, 0.0, true, 1.0);
-	g_CvarAllowPickup = CreateConVar("sm_uwr_allow_restricted_pickup", "0", "", _, true, 0.0, true, 1.0);
-	g_CvarAdminImmunity = CreateConVar("sm_uwr_admin_immunity", "0", "", _, true, 0.0, true, 1.0);
-	g_CvarNotify = CreateConVar("sm_uwr_notify", "1", "", _, true, 0.0, true, 1.0);
-	g_CvarRestrictSound = CreateConVar("sm_uwr_restricted_sound", DEFAULT_RESTRICT_SOUND, "");
-	g_CvarPerPlayerEnabled = CreateConVar("sm_uwr_perplayer_enabled", "0", "", _, true, 0.0, true, 1.0);
-	g_CvarPerPlayerBots = CreateConVar("sm_uwr_perplayer_count_bots", "1", "", _, true, 0.0, true, 1.0);
-	g_CvarPerPlayerSpecs = CreateConVar("sm_uwr_perplayer_count_specs", "1", "", _, true, 0.0, true, 1.0);
-	g_CvarVersion = CreateConVar("sm_umbrella_weaponrestrict_version", PLUGIN_VERSION, "", FCVAR_NOTIFY | FCVAR_DONTRECORD);
+	g_CvarEnabled = CreateConVar("sm_uwr_enabled", "1", "Enable weapon restrictions (1 = on, 0 = off).", _, true, 0.0, true, 1.0);
+	g_CvarAllowPickup = CreateConVar("sm_uwr_allow_restricted_pickup", "0", "Allow picking up restricted weapons from the ground (1 = allow, 0 = block).", _, true, 0.0, true, 1.0);
+	g_CvarAdminImmunity = CreateConVar("sm_uwr_admin_immunity", "0", "Admins with the umbrella_weapon_restrict_immunity override (root by default) ignore restrictions and are not counted.", _, true, 0.0, true, 1.0);
+	g_CvarNotify = CreateConVar("sm_uwr_notify", "1", "Print a chat message when a buy or pickup is blocked.", _, true, 0.0, true, 1.0);
+	g_CvarRestrictSound = CreateConVar("sm_uwr_restricted_sound", DEFAULT_RESTRICT_SOUND, "Sound played when a buy or pickup is blocked, relative to sound/. Empty disables it.");
+	g_CvarPerPlayerEnabled = CreateConVar("sm_uwr_perplayer_enabled", "0", "Apply the limits from configs/umbrella_weapon_restrict/perplayerrestrict.txt based on player count.", _, true, 0.0, true, 1.0);
+	g_CvarPerPlayerBots = CreateConVar("sm_uwr_perplayer_count_bots", "1", "Count bots for per-player limits.", _, true, 0.0, true, 1.0);
+	g_CvarPerPlayerSpecs = CreateConVar("sm_uwr_perplayer_count_specs", "1", "Count spectators and unassigned players for per-player limits.", _, true, 0.0, true, 1.0);
+	g_CvarVersion = CreateConVar("sm_umbrella_weaponrestrict_version", PLUGIN_VERSION, "Umbrella Weapon Restrict version.", FCVAR_NOTIFY | FCVAR_DONTRECORD);
 	g_CvarVersion.SetString(PLUGIN_VERSION, true, false);
 
 	g_CvarEnabled.AddChangeHook(OnCoreCvarChanged);
@@ -395,8 +430,18 @@ void CreateWeaponCvar(CSWeaponID id, const char[] alias, int teamIndex, const ch
 	char cvarName[96];
 	Format(cvarName, sizeof(cvarName), "sm_restrict_%s_%s", alias, suffix);
 
+	char description[128];
+	if (IsStackableWeapon(id))
+	{
+		Format(description, sizeof(description), "Max %s grenades the %s team can carry in total (-1 = unlimited, 0 = blocked).", alias, teamIndex == TEAM_INDEX_T ? "T" : "CT");
+	}
+	else
+	{
+		Format(description, sizeof(description), "Max %s the %s team can have at once (-1 = unlimited, 0 = blocked).", alias, teamIndex == TEAM_INDEX_T ? "T" : "CT");
+	}
+
 	int rawId = view_as<int>(id);
-	g_RestrictCvars[rawId][teamIndex] = CreateConVar(cvarName, "-1", "", _, true, -1.0, true, 64.0);
+	g_RestrictCvars[rawId][teamIndex] = CreateConVar(cvarName, "-1", description, _, true, -1.0, true, 64.0);
 	g_RestrictCvars[rawId][teamIndex].AddChangeHook(OnRestrictionCvarChanged);
 	g_DefaultRestrictions[rawId][teamIndex] = -1;
 }
@@ -446,8 +491,20 @@ public Action Event_RoundStart(Event event, const char[] name, bool dontBroadcas
 
 public Action Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 {
-	ApplyPerPlayerRestrictions();
+	// player_team fires before the team actually changes, so count on the next frame.
+	if (!g_PerPlayerFrameQueued)
+	{
+		g_PerPlayerFrameQueued = true;
+		RequestFrame(Frame_ApplyPerPlayer);
+	}
+
 	return Plugin_Continue;
+}
+
+public void Frame_ApplyPerPlayer(any data)
+{
+	g_PerPlayerFrameQueued = false;
+	ApplyPerPlayerRestrictions();
 }
 
 public Action Command_OpenMenu(int client, int args)
@@ -895,8 +952,36 @@ public Action Hook_WeaponCanUse(int client, int weapon)
 		return Plugin_Continue;
 	}
 
-	NotifyRestricted(client, id, GetRestriction(id, team), EntIndexToEntRef(weapon));
+	int weaponRef = EntIndexToEntRef(weapon);
+	if (IsWeaponCreatedThisTick(weapon))
+	{
+		// Freshly given item (spawn loadout or another plugin's give): remove it instead of leaving it on the floor.
+		RequestFrame(Frame_RemoveUnownedWeapon, weaponRef);
+	}
+
+	NotifyRestricted(client, id, GetRestriction(id, team), weaponRef);
 	return Plugin_Handled;
+}
+
+bool IsWeaponCreatedThisTick(int weapon)
+{
+	return weapon > MaxClients && weapon < MAX_TRACKED_ENTITIES && g_WeaponCreatedTick[weapon] == GetGameTickCount();
+}
+
+public void Frame_RemoveUnownedWeapon(any weaponRef)
+{
+	int weapon = EntRefToEntIndex(weaponRef);
+	if (weapon == INVALID_ENT_REFERENCE || weapon <= MaxClients || !IsValidEntity(weapon))
+	{
+		return;
+	}
+
+	if (HasEntProp(weapon, Prop_Send, "m_hOwnerEntity") && GetEntPropEnt(weapon, Prop_Send, "m_hOwnerEntity") != -1)
+	{
+		return;
+	}
+
+	AcceptEntityInput(weapon, "Kill");
 }
 
 bool CanEvaluateClient(int client)
@@ -1375,6 +1460,7 @@ int CountClientWeapons(int client, CSWeaponID id)
 		return 0;
 	}
 
+	bool stackable = IsStackableWeapon(id);
 	int count = 0;
 	int weaponCount = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
 	for (int i = 0; i < weaponCount; i++)
@@ -1382,11 +1468,39 @@ int CountClientWeapons(int client, CSWeaponID id)
 		int weapon = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
 		if (weapon > MaxClients && IsValidEntity(weapon) && WeaponIdFromEntity(weapon) == id)
 		{
-			count++;
+			// A stack of grenades is a single entity; the amount lives in the player's ammo.
+			count += stackable ? GetGrenadeStackCount(client, GetWeaponAmmoType(client, weapon)) : 1;
 		}
 	}
 
 	return count;
+}
+
+int GetWeaponAmmoType(int client, int weapon)
+{
+	if (!HasEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType") || !HasEntProp(client, Prop_Send, "m_iAmmo"))
+	{
+		return -1;
+	}
+
+	int ammoType = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
+	if (ammoType < 0 || ammoType >= GetEntPropArraySize(client, Prop_Send, "m_iAmmo"))
+	{
+		return -1;
+	}
+
+	return ammoType;
+}
+
+int GetGrenadeStackCount(int client, int ammoType)
+{
+	if (ammoType == -1)
+	{
+		return 1;
+	}
+
+	int ammo = GetEntProp(client, Prop_Send, "m_iAmmo", _, ammoType);
+	return ammo > 0 ? ammo : 1;
 }
 
 int CountTeamWeapons(int team, CSWeaponID id)
@@ -1420,7 +1534,11 @@ void EnforceClientWeaponLimit(int client, CSWeaponID id, int &remaining)
 			return;
 		}
 
-		RemoveClientSpecialItem(client, id);
+		if (RemoveClientSpecialItem(client, id))
+		{
+			QueueEnforce();
+		}
+
 		return;
 	}
 
@@ -1429,6 +1547,7 @@ void EnforceClientWeaponLimit(int client, CSWeaponID id, int &remaining)
 		return;
 	}
 
+	bool stackable = IsStackableWeapon(id);
 	int weaponCount = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
 	for (int i = 0; i < weaponCount; i++)
 	{
@@ -1438,7 +1557,30 @@ void EnforceClientWeaponLimit(int client, CSWeaponID id, int &remaining)
 			continue;
 		}
 
-		if (remaining > 0)
+		if (stackable)
+		{
+			int ammoType = GetWeaponAmmoType(client, weapon);
+			int held = GetGrenadeStackCount(client, ammoType);
+			if (remaining >= held)
+			{
+				remaining -= held;
+				continue;
+			}
+
+			if (remaining > 0 && ammoType != -1)
+			{
+				SetEntProp(client, Prop_Send, "m_iAmmo", remaining, _, ammoType);
+				remaining = 0;
+				continue;
+			}
+
+			// Clear the stack too, otherwise the next grenade picked up would bring the old count back.
+			if (ammoType != -1)
+			{
+				SetEntProp(client, Prop_Send, "m_iAmmo", 0, _, ammoType);
+			}
+		}
+		else if (remaining > 0)
 		{
 			remaining--;
 			continue;
@@ -1454,6 +1596,21 @@ CSWeaponID WeaponIdFromEntity(int entity)
 	if (entity <= MaxClients || !IsValidEntity(entity))
 	{
 		return CSWeapon_NONE;
+	}
+
+	// CS:GO variants share a classname (USP-S is weapon_hkp2000, M4A1-S is weapon_m4a1,
+	// CZ75-Auto is weapon_p250, R8 is weapon_deagle), so use the item definition index there.
+	if (g_Engine == Engine_CSGO && HasEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"))
+	{
+		int defIndex = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
+		if (defIndex > 0 && defIndex < CSGO_MAX_WEAPON_DEFINDEX)
+		{
+			CSWeaponID defId = CS_ItemDefIndexToID(defIndex);
+			if (defId != CSWeapon_NONE)
+			{
+				return defId;
+			}
+		}
 	}
 
 	char classname[64];
@@ -1531,7 +1688,12 @@ bool ShouldManageWeapon(CSWeaponID id)
 			 CSWeapon_DEFUSER,
 			 CSWeapon_CUTTERS,
 			 CSWeapon_HEALTHSHOT,
-			 CSWeapon_TABLET:
+			 CSWeapon_TABLET,
+			 CSWeapon_FISTS,
+			 CSWeapon_MELEE,
+			 CSWeapon_AXE,
+			 CSWeapon_HAMMER,
+			 CSWeapon_SPANNER:
 		{
 			return false;
 		}
@@ -1600,7 +1762,7 @@ bool ClientHasSpecialItem(int client, CSWeaponID id)
 		}
 		case CSWeapon_ASSAULTSUIT:
 		{
-			return GetClientSendPropInt(client, "m_ArmorValue") > 0 && GetClientSendPropInt(client, "m_bHasHelmet") != 0;
+			return GetClientSendPropInt(client, "m_ArmorValue") > 0 && GetClientSendPropInt(client, "m_bHasHelmet") != 0 && GetClientSendPropInt(client, "m_bHasHeavyArmor") == 0;
 		}
 		case CSWeapon_HEAVYASSAULTSUIT:
 		{
@@ -1611,8 +1773,11 @@ bool ClientHasSpecialItem(int client, CSWeaponID id)
 	return false;
 }
 
-void RemoveClientSpecialItem(int client, CSWeaponID id)
+// Returns true when the item was downgraded to a lower armor tier instead of removed outright,
+// so the caller can run enforcement again for the tier it now counts as.
+bool RemoveClientSpecialItem(int client, CSWeaponID id)
 {
+	int team = GetClientTeam(client);
 	switch (id)
 	{
 		case CSWeapon_KEVLAR:
@@ -1624,14 +1789,30 @@ void RemoveClientSpecialItem(int client, CSWeaponID id)
 		}
 		case CSWeapon_ASSAULTSUIT:
 		{
-			SetClientSendPropIntIfExists(client, "m_ArmorValue", 0);
+			// Strip only the helmet when plain kevlar is still allowed for this team.
 			SetClientSendPropIntIfExists(client, "m_bHasHelmet", 0);
+			if (GetRestriction(CSWeapon_KEVLAR, team) == 0)
+			{
+				SetClientSendPropIntIfExists(client, "m_ArmorValue", 0);
+				return false;
+			}
+
+			return true;
 		}
 		case CSWeapon_HEAVYASSAULTSUIT:
 		{
+			// Heavy armor goes above 100; cap it back to a regular assault suit.
 			SetClientSendPropIntIfExists(client, "m_bHasHeavyArmor", 0);
+			if (GetClientSendPropInt(client, "m_ArmorValue") > 100)
+			{
+				SetClientSendPropIntIfExists(client, "m_ArmorValue", 100);
+			}
+
+			return true;
 		}
 	}
+
+	return false;
 }
 
 int GetClientSendPropInt(int client, const char[] propName)
@@ -2031,23 +2212,30 @@ void GetTeamNameForCommand(int team, int target, char[] name, int maxLength)
 
 void NotifyRestricted(int client, CSWeaponID id, int limit, int weaponRef = INVALID_ENT_REFERENCE)
 {
+	float now = GetGameTime();
 	if (weaponRef != INVALID_ENT_REFERENCE)
 	{
-		if (g_LastPickupNotifyRef[client] != INVALID_ENT_REFERENCE && EntRefToEntIndex(g_LastPickupNotifyRef[client]) == INVALID_ENT_REFERENCE)
+		// Touch fires every tick, so remember the last few weapons already reported
+		// instead of only the last one; standing on a pile would otherwise alternate forever.
+		for (int slot = 0; slot < PICKUP_NOTIFY_SLOTS; slot++)
 		{
-			g_LastPickupNotifyRef[client] = INVALID_ENT_REFERENCE;
+			if (g_PickupNotifyRefs[client][slot] == weaponRef)
+			{
+				return;
+			}
 		}
 
-		if (g_LastPickupNotifyRef[client] == weaponRef)
+		if (now < g_NextPickupNotify[client])
 		{
 			return;
 		}
 
-		g_LastPickupNotifyRef[client] = weaponRef;
+		g_NextPickupNotify[client] = now + NOTIFY_DELAY;
+		g_PickupNotifyRefs[client][g_PickupNotifySlot[client]] = weaponRef;
+		g_PickupNotifySlot[client] = (g_PickupNotifySlot[client] + 1) % PICKUP_NOTIFY_SLOTS;
 	}
 	else
 	{
-		float now = GetGameTime();
 		if (now < g_NextNotify[client])
 		{
 			return;
